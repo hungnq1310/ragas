@@ -1,7 +1,7 @@
 # @title
 import json
 import sys
-sys.path.insert(0,r'./')
+
 import pprint
 from typing import List, Dict
 from dataclasses import dataclass, asdict, fields
@@ -96,57 +96,57 @@ class AdvanceInstructSample:
             raise f"This task type {task_type} is not support"
 
 
-if __name__ == "__main__":
-    example8 = AdvanceInstructSample(qas_id="8", question_text="What do cats eat?",
-                                    orig_answer_texts="meat and fish", system_prompt="Hi")
 
-    print(example8.get_example(is_training=True, task_type="CAUSAL_LM"))
-    example6 = AdvanceInstructSample(qas_id="6", question_text="What is the meaning of existence?",
-                                     orig_answer_texts="Dying", system_prompt="Hello")
-    # print(example6)
-    print(example6.get_example(is_training=True, task_type="SEQ_2_SEQ_LM"))
+example8 = AdvanceInstructSample(qas_id="8", question_text="What do cats eat?",
+                                orig_answer_texts="meat and fish", system_prompt="Hi")
 
-    # @title
-    json_gbnf = r"""root   ::= customObject
-    value  ::= object | array | string | number | ("true" | "false" | "null") ws
+print(example8.get_example(is_training=True, task_type="CAUSAL_LM"))
+example6 = AdvanceInstructSample(qas_id="6", question_text="What is the meaning of existence?",
+                                    orig_answer_texts="Dying", system_prompt="Hello")
+# print(example6)
+print(example6.get_example(is_training=True, task_type="SEQ_2_SEQ_LM"))
 
-    customObject ::=
-    "{" ws (
-        "\"reasoning\":" ws value ","
-        ws "\"intent\":" ws value
-    )? "}" ws
+# @title
+json_gbnf = r"""root   ::= customObject
+value  ::= object | array | string | number | ("true" | "false" | "null") ws
 
-    object ::=
-    "{" ws (
-                string ":" ws value
-        ("," ws string ":" ws value)*
-    )? "}" ws
+customObject ::=
+"{" ws (
+    "\"reasoning\":" ws value ","
+    ws "\"intent\":" ws value
+)? "}" ws
 
-    array  ::=
-    "[" ws (
-                value
-        ("," ws value)*
-    )? "]" ws
+object ::=
+"{" ws (
+            string ":" ws value
+    ("," ws string ":" ws value)*
+)? "}" ws
 
-    string ::=
-    "\"" (
-        [^"\\\x7F\x00-\x1F] |
-        "\\" (["\\/bfnrt] | "u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F]) # escapes
-    )* "\"" ws
+array  ::=
+"[" ws (
+            value
+    ("," ws value)*
+)? "]" ws
 
-    number ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)? ws
+string ::=
+"\"" (
+    [^"\\\x7F\x00-\x1F] |
+    "\\" (["\\/bfnrt] | "u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F]) # escapes
+)* "\"" ws
 
-    # Optional space: by convention, applied in this grammar after literal chars when allowed
-    ws ::= ([ \t\n] ws)?"""
+number ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)? ws
 
-    # Load the json_gbnf object
-    # (Assume it is already defined and contains the data you want to save)
+# Optional space: by convention, applied in this grammar after literal chars when allowed
+ws ::= ([ \t\n] ws)?"""
 
-    # Open a file for writing in binary mode
-    with open('json.gbnf', 'w') as outfile:
-        # Encode the json_gbnf string to bytes and write to the file
-        outfile.write(json_gbnf)
+# Load the json_gbnf object
+# (Assume it is already defined and contains the data you want to save)
 
-    with open('json.gbnf', 'r') as infile:
-        json_grammar = infile.read()
-    print(json_grammar)
+# Open a file for writing in binary mode
+with open('json.gbnf', 'w') as outfile:
+    # Encode the json_gbnf string to bytes and write to the file
+    outfile.write(json_gbnf)
+
+with open('json.gbnf', 'r') as infile:
+    json_grammar = infile.read()
+print(json_grammar)
