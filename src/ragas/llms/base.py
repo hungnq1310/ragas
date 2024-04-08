@@ -6,16 +6,23 @@ import typing as t
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import partial
+import json
+from typing import Any, Coroutine
 
 from langchain_community.chat_models import ChatVertexAI
 from langchain_community.llms import VertexAI
+from langchain_core.callbacks import Callbacks
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.outputs import LLMResult
 from langchain_openai.chat_models import AzureChatOpenAI, ChatOpenAI
 from langchain_openai.llms import AzureOpenAI, OpenAI
 from langchain_openai.llms.base import BaseOpenAI
+from ragas.llms.prompt import PromptValue
 
 from ragas.run_config import RunConfig, add_async_retry, add_retry
+from ragas.utils import api_inference, format_prompt
+from .prompt_tllm import AdvanceInstructSample, json_grammar
+
 
 if t.TYPE_CHECKING:
     from langchain_core.callbacks import Callbacks
@@ -211,3 +218,93 @@ def llm_factory(
         timeout = run_config.timeout
     openai_model = ChatOpenAI(model=model, timeout=timeout)
     return LangchainLLMWrapper(openai_model, run_config)
+
+
+class EndpointModel(BaseRagasLLM):
+    def __init__(self, url, run_config: t.Optional[RunConfig] = None):
+        self.url = url + "/completion"
+        self.headers = {
+            "Content-Type": "application/json"
+        }
+        if run_config is None:
+            run_config = RunConfig()
+        self.set_run_config(run_config)
+        
+
+    def generate_text(self, 
+        text: str, 
+        temperature=0.7, 
+        dynatemp_range = 0.3 ,
+        n_keep = -1 ,
+        grammar = "",
+        top_p = 0.45,
+        min_p = 0.045, 
+        seed = -1,
+        top_k = 60,
+        repeat_penalty = 1.15,
+        presence_penalty = 0,
+        frequency_penalty = 0,
+        new_session_stop_word = "[NEW]",
+        stream = True,
+        cache_prompt = True,
+        system_prompt=None,
+        **kwargs
+    ):
+        grammar = json_grammar if grammar == "json_grammar" else ""
+        
+
+        default_system_prompt = """
+        You're an AI Large Language Model developed(created) by an AI developer named Tuấn Phạm, your task are to think loudly step by step before give a good and relevant response
+        to the user request based on their provided documents, answer in the language the user preferred. Only using the provided knowledge, not using your pretrained knowledge.
+
+        The following is a conversation with an AI Large Language Model. The AI has been trained to answer questions, provide recommendations, and help with decision making.
+        The AI follows user requests. The AI thinks outside the box.
+
+        The AI will take turn in a multi-turn dialogs conversation with the user, stay in context with the previous chat.
+        """
+        qas_id = "TEST"
+        orig_answer_texts = "TEST"
+
+        prompted_input = system_prompt or default_system_prompt
+
+        final_message = prompted_input + f"Base on the provided documents, answer the following question:\n" + text
+
+        config_prompt = format_prompt(
+            AdvanceInstructSample, 
+            {"qas_id": qas_id,
+            "system_prompt": prompted_input,
+            "orig_answer_texts": orig_answer_texts,
+            "question_text": final_message
+        })
+        
+
+        data = {
+            "prompt": config_prompt,
+            "temperature": temperature,
+            "dynatemp_range": dynatemp_range,
+            "n_keep": n_keep,
+            "stream": stream,
+            "cache_prompt": cache_prompt,
+            "grammar": grammar,
+            "top_p": top_p,
+            "min_p": min_p,
+            "seed": seed,
+            "top_k": top_k,
+            "repeat_penalty": repeat_penalty,
+            "presence_penalty": presence_penalty,
+            "frequency_penalty": frequency_penalty,
+        }
+
+        client = api_inference(self.url, self.headers, data, verify=False, stream=True)
+        assistant_message = ''
+        for event in client.events():
+            payload = json.loads(event.data)
+            chunk = payload['content']
+            assistant_message += chunk
+        fake_output = LLMResult(
+            generations=[[assistant_message]],
+        )
+        return fake_output
+    
+    def agenerate_text(self, prompt: PromptValue, n: int = 1, temperature: float = 1e-8, stop: List[str] | None = None, callbacks: Callbacks = None) -> LLMResult:
+        ...
