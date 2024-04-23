@@ -16,7 +16,7 @@ from ragas._analytics import TestsetGenerationEvent, track
 from ragas.embeddings.base import BaseRagasEmbeddings, LangchainEmbeddingsWrapper
 from ragas.exceptions import ExceptionInRunner
 from ragas.executor import Executor
-from ragas.llms import BaseRagasLLM, LangchainLLMWrapper
+from ragas.llms.base import BaseRagasLLM, LangchainLLMWrapper
 from ragas.run_config import RunConfig
 from ragas.testset.docstore import Document, DocumentStore, InMemoryDocumentStore
 from ragas.testset.evolutions import (
