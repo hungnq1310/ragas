@@ -16,7 +16,7 @@ Ragas takes a novel approach to evaluation data generation. An ideal evaluation 
 
 ### In-Depth Evolution
 
-Language Language Models (LLMs) possess the capability to transform simple questions into more complex ones effectively. To generate medium to hard samples from the provided documents, we employ the following methods:
+Large Language Models (LLMs) possess the capability to transform simple questions into more complex ones effectively. To generate medium to hard samples from the provided documents, we employ the following methods:
 
 - **Reasoning:** Rewrite the question in a way that enhances the need for reasoning to answer it effectively.
 
@@ -37,7 +37,7 @@ Moving forward, we are will be expanding the range of evolution techniques to of
 
 ```{code-block} python
 :caption: loading documents using langchain
-from langchain.document_loaders import PubMedLoader
+from langchain_community.document_loaders import PubMedLoader
 
 loader = PubMedLoader("liver", load_max_docs=10)
 documents = loader.load()
