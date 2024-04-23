@@ -306,5 +306,5 @@ class EndpointModel(BaseRagasLLM):
         )
         return fake_output
     
-    def agenerate_text(self, prompt: PromptValue, n: int = 1, temperature: float = 1e-8, stop: List[str] | None = None, callbacks: Callbacks = None) -> LLMResult:
+    async def agenerate_text(self, prompt: PromptValue, n: int = 1, temperature: float = 1e-8, stop: List[str] | None = None, callbacks: Callbacks = None) -> LLMResult:
         ...
