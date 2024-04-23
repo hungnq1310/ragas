@@ -44,7 +44,7 @@ class KeyphraseExtractor(Extractor):
         default_factory=lambda: keyphrase_extraction_prompt
     )
 
-    async def extract(self, node: Node, is_async: bool = True) -> t.List[str]:
+    async def extract(self, node: Node, is_async: bool = False) -> t.List[str]:
         prompt = self.extractor_prompt.format(text=node.page_content)
         results = await self.llm.generate(prompt=prompt, is_async=is_async)
         keyphrases = await json_loader.safe_load(

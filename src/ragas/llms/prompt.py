@@ -4,14 +4,17 @@ import json
 import logging
 import os
 import typing as t
+from typing import TYPE_CHECKING
 
 from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.prompt_values import PromptValue as BasePromptValue
 from langchain_core.pydantic_v1 import BaseModel, root_validator
 
-from ragas.llms import BaseRagasLLM
 from ragas.llms.json_load import json_loader
 from ragas.utils import get_cache_dir
+
+if TYPE_CHECKING:
+    from ragas.llms.base import BaseRagasLLM
 
 Example = t.Dict[str, t.Any]
 
@@ -161,7 +164,7 @@ class Prompt(BaseModel):
         return PromptValue(prompt_str=prompt.format(**kwargs))
 
     def adapt(
-        self, language: str, llm: BaseRagasLLM, cache_dir: t.Optional[str] = None
+        self, language: str, llm: "BaseRagasLLM", cache_dir: t.Optional[str] = None
     ) -> Prompt:
         def get_all_keys(nested_json):
             keys = set()
